@@ -1,0 +1,47 @@
+\documentclass{sig-alternate}
+\usepackage{graphicx, subfigure, multirow, times, balance}
+\usepackage{balance, url, amsfonts, verbatim, mathtools}
+
+\renewcommand{\ttdefault}{cmtt}
+\usepackage{mdwlist}
+
+\newenvironment{myitemize}
+{
+   \vspace{0mm}
+    \begin{list}{$\bullet$ }{}
+        \setlength{\topsep}{0em}
+        \setlength{\parskip}{0pt}
+        \setlength{\partopsep}{0pt}
+        \setlength{\parsep}{0pt}         
+        \setlength{\itemsep}{1mm} 
+}
+{
+    \end{list} 
+    \vspace{-1em}
+}
+
+\begin{document}
+
+\title{PBS Made Live}
+
+\author{Peter Bailis, Shivaram Venkataraman, Michael J. Franklin, Joseph M. Hellerstein, Ion Stoica\\
+\affaddr{University of California, Berkeley}\\
+\affaddr{\{pbailis, shivaram, franklin, hellerstein, istoica\}@cs.berkeley.edu}}
+
+\interfootnotelinepenalty=10000
+\hyphenation{prob-a-bil-is-tic-ally}
+
+\maketitle
+
+\input{abstract}
+\input{intro}
+\input{usage}
+\input{arch}
+\input{demo}
+
+\section{Acknowledgments}
+
+\bibliographystyle{abbrv}
+\bibliography{pbs-demo}
+
+\end{document}
