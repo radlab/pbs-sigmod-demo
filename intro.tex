@@ -1,1 +1,69 @@
 \section{Introduction}
+
+Modern distributed data stores offer a choice. Weak consistency models
+are fast and guarantee ``always-on'' behavior, but provide limited
+semantics. Stronger consistency models are easier to reason about but
+slower and potentially unavailable. The choice of consistency has
+wide-ranging implications for application writers, operations
+management, and end-users, and, in light of its performance benefits,
+weak consistency is often acceptable.
+
+Using one predominant consistency model, eventual consistency, is, on
+its face, a cavalier proposition. Prevalent models such as eventual
+consistency provide no guarantees as to when new writes will become
+visible to readers and what versions of data items will be presented
+in the interim. Reading all \texttt{null} values from a database is
+eventually consistent. The data store can delay write visbility for
+decades and not violate its guarantees. Yet, despite these weak
+semantics, there is common sentiment among practitioners that eventual
+consistency is often ``good enough'' and ``worthwhile'' for many
+applications.
+
+In recent work, we provided an analytical and empirical framework for
+analyzing the consistency provided by eventually consistent stores, or
+``how eventual and how consistent is eventual consistency?'', called
+Probabilistically Bounded Staleness, or PBS. Eventually consistent
+stores do not make promises about answers to the length of time
+required to observe an update or the staleness of values, but this
+does not preclude us from making informed statements about what is
+likely to happen. By using expert knowledge of the underlying data
+store and its replication protocols in addition to some lightweight
+in-situ profiling, we can inform data store users about what
+consistency they are likely to observe in the future.
+
+Our PBS predictions are part of a larger trend towards providing
+quantitative measurements and analysis of weakly consistent
+stores. There is recent work ranging from distributed systems theory
+to database practitioner communities on measuring violations of
+properties such as atomicity, serializability, and regular register
+semantics. PBS in particular has experienced relative popularity in
+the NoSQL community and our implementation of PBS for quorum-based
+systems was recently accepted to Cassandra's mainline source trunk and
+will be released by the end of 2012. Afeter discussions with other
+researchers pursuing consistency monitoring and verification, we
+expect more technology transfer in this space.
+
+While monitoring and prediction are useful in themselves, perhaps more
+importantly, they enable a rich space of applications that we believe
+have been neglected. For example, in our initial PBS work, we mostly
+assume that simply recording the predictions is a worthwhile task:
+what they are used for is mostly left for future work. We are most
+excited about three particular applications: \textit{i.)} dynamic
+request-based consistency parameters, or auto-tuning request routing
+based on a given latency and consistency service level agreement,
+\textit{ii.)} database administration tasks with respect to the impact
+of slow nodes and networks, replication factors, and data store
+paramers like anti-entropy rates, and \textit{iii.)} integration into
+traditional alerts and monitoring frameworks. We elaborate further in
+Section~\ref{sec:scenarios}, but, in short, these quantitative metrics
+allow new ways to tune the performance, semantics, and the maintenance
+of eventually consistent stores.
+
+In this demo proposal, we outline these advanced use cases in detail
+(Section~\ref{sec:scenarios}), describe how both quantitative metrics
+can be integrated into existing stores and architectures based on our
+experiences with the Cassandra community
+(Section~\ref{sec:architecture}), and sketch how we plan to
+demonstrate this newly enabled functionality, allowing SIGMOD
+attendees to act as both end-users and operations managers for an
+eventually consistent service (Section~\ref{sec:demo}).

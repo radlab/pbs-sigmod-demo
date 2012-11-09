@@ -1,1 +1,35 @@
 \section{Usage Scenarios}
+\label{sec:scenarios}
+
+Quantative consistency metrics are useful for a variety of services
+that can tolerate eventual consistency. In this section, we outline
+three use cases in the context of a hypothetical microblogging web
+service, Twissistency.
+
+\subsection{Dynamic Requests}
+
+\textit{Twissistency's data scientists have learned that their users
+  respond negatively to high latencies, and the company sets a desired
+  latency bound of 50ms for their back-end data store requests.}\\
+
+Data stores often offer a choice between replication parameters. For
+example, in Dynamo-style sytems, applications can choose the minimum
+number of replicas to read from ($R$) and write to ($W$). If $R$+$W$
+is greater than the number of replicas ($N$), applications will read
+their writes, and, if not, the system provides eventual
+consistency. With a replication factor of $N=3$, we have three options
+for eventually consistent operation: $R$$=$$W$$=$$1$, $R$$=$$1$$,
+W$$=$$2$, and $R$$=$$2$$, W$$=$$1$. $R$$=$$W$$=$$1$ is guaranteed to
+be fastest, but it is also the least consistent.
+
+\textit{Based on feedback from their infrastructure team, the
+  application developers set $R$=$W$=$1$ for their Dynamo-based data
+  store. This meets the latency SLA with an average latency of 10ms,
+  but they notice that many requests return stale data. They would
+  like to use $R$=$W$=$2$, but this is too slow, while other
+  eventually consistent operations are too slow only during periods of
+  peak traffic.}\\
+
+\subsection{DBA Integration}
+
+\subsection{Monitoring and Alerts}
