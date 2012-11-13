@@ -23,6 +23,17 @@ the metrics used the monitoring framework.}
 \label{fig:pbs-sys-arch}
 \end{figure}
 
+\begin{figure*}[tb]
+\centering
+\includegraphics[width=.90\textwidth]{figs/pbs-demo-screenshot.pdf}
+\caption{A screenshot of a PBS demo indicating the values of t-visibility for a
+given latency distribution. Our admin interface will be an extension of this
+demo and will highlight the observed consistency measurements.}
+\label{fig:pbs-demo-screenshot}
+\end{figure*}
+
+
+
 \subsection{Database Architecture}
 
 The lower half of Figure~\ref{fig:pbs-sys-arch} shows the architecture changes
@@ -98,3 +109,4 @@ issue  periodic PBS prediction requests and plot the values of t-visibility and
 k-staleness as a timeseries. This can then be integrated with rule-based
 alerting systems to page an operator if the value of t-visibility is beyond a
 particular threshold for an extended time period.
+

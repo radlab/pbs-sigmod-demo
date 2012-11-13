@@ -68,3 +68,26 @@ experiences with the Cassandra community
 demonstrate this newly enabled functionality, allowing SIGMOD
 attendees to act as both end-users and operations managers for an
 eventually consistent service (Section~\ref{sec:demo}).
+
+\subsection{PBS Metrics}
+To provide some background, We summarize the metrics
+proposed~\cite{pbs-vldb2012} in PBS for measuring data staleness.  Data
+staleness can be expressed in terms of two metrics: \textit{k-staleness}
+represents staleness in terms of versions and \textit{t-visibility} represents
+staleness in terms of wall-clock time. We present definitions and examples
+below.
+
+\textbf{k-staleness:} k-staleness can be used to determine the probability of
+a read returning a value within a bounded number of versions. For example, if
+our application can tolerate data items which could be $3$ versions old, then
+for a given configuration, we can estimate the probability that our application
+will violate its consistency requirements. 
+
+
+\textbf{t-visibility:} $t$-visibility captures the ``window of inconsistency``
+in terms of wall clock time after a write happens. More formally, $t$-visibility
+is the probability that a read operation starting $t$ seconds after the previous
+write completed will see the most recent value from the data store. For example,
+if the datastore configuration has $t$-visibilty of 95\% at 10ms, it means that
+10ms after the write completes, 95\% of read operations will see the most recent
+value.
