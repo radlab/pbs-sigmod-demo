@@ -5,64 +5,85 @@
 %integrated into the DB admin's interface. Also showing why consistency metrics
 %are important and how PBS can be used to measure this etc.
 
-We will present an end-to-end demonstration that will show how metrics defined
-by PBS can be used to capture the impact of consistency on user experience. We
-will also highlight how database administrators can monitor and modify system
-parameters to trade-off consistency for latency.\\[-.5em]
+We will present an end-to-end demonstration that will show how metrics
+defined by PBS can be used to capture the impact of consistency on
+user experience. We will also highlight how database administrators
+can monitor and modify system parameters to trade-off consistency for
+latency. The demonstration will consist of several components:
 
-The demonstration will consist of several components:
+\begin{figure*}[tb]
+\centering
+%\includegraphics[width=.90\textwidth]{figs/pbs-demo-screenshot.pdf}
+\subfigure[Mobile Web App]{\includegraphics[width=.22\textwidth]{figs/phone.pdf}\label{fig:app}}
+\subfigure[DBA and Query Tuning Dashboard]{\includegraphics[width=.38\textwidth]{figs/dash.pdf}\label{fig:dash}}
+\subfigure[Chaos Console]{\includegraphics[width=.39\textwidth]{figs/chaos.pdf}\label{fig:chaos}}
+\caption{Mock-ups for the mobile social web application---which
+  attendees will interact with as end-users---and back-end diagnostic
+  views. In the Dashboard, attendees can monitor system consistency
+  and set latency and consistency SLAs. In the Chaos Console,
+  attendees will wreak havoc on the application's Cassandra cluster
+  via several (real-time) configurable failure modes.}
+\label{fig:pbs-demo-screenshot}
+\end{figure*}
+
+
+
+
 
 %Specific demo setup details: What is the app going to be -- What tables is it
 %going to contain and how is this stored in Cassandra ?
 
-\textbf{Web Application:} We will implement a Twitter-like web
-application such as Twissandra. We plan to make a web-interface that
-will be available to all SIGMOD attendees and a mobile application
-that can be used to post messages about the conference.
-
-\textbf{Data Sets:} In addition to the messages posted by SIGMOD
-attendees, we plan to replay a corpus of 4,937,001 Tweets from
+As a driving use case, we will implement \textbf{Twissistency}, a
+Twitter-like microblogging application. Twissistency will expose a web
+interface that will be available to all SIGMOD attendees and provide a
+mobile application that can be used to post messages about the
+conference. In addition to the messages posted by SIGMOD attendees, we
+plan to \textbf{replay a corpus} of 4,937,001 Tweets from
 conversations obtained from the Twitter firehose between February and
-July 2011~\cite{ritter2010unsupervised}.  This will help us explore
-some of the issues that arise with a heavy workload.
-
-\textbf{Distributed Datastore:} We will host a 50-node Cassandra
-cluster on EC2 to support our web application. The Cassandra instances
-will use a table to store the Tweets published and a separate table to
-store the follower/following relationship information.\\[-.5em]
+July 2011~\cite{ritter2010unsupervised}. This will help us explore
+heavier workloads, particularly in the absence of a deluge of activity
+from SIGMOD attendees. Twissistency will store messages in a 50-node
+\textbf{Cassandra cluster} running on EC2. PBS is integrated in
+Cassandra, but we will also augment Cassandra to provide consistency
+monitoring as described in Section~\ref{sec:dbarch}.
 
 %Demo screens detail - We will have two screens and what each one will show. How
 %can the audience interact with the demo ?
 
-To illustrate the utility of consistency metrics, we will present two
-interactive, ``behind-the-scenes'' DBA- and application-oriented
-dashboards:
+To illustrate the utility of consistency metrics, we will provide
+attendees with the opportunity to experience consistency from three
+perspectives: as user, administrator, and powerful adversary.
 
-\textbf{DB admin interface:} We will show a monitoring console that
-measures and plots the consistency and latency over 10-second time
-intervals.  Additionally the admin interface will allow users to
-modify system parameters like the read repair chance and set
-consistency SLAs for read and write
-operations. Figure~\ref{fig:pbs-demo-screenshot} shows an example DBA
-dashboard will look.
-
-\textbf{User interface:} The user interface screen will show our
-web-application described previously and will allow attendees to post
-and read messages. We will also provide an optional setting that
+The \textbf{user interface} screen will host the Twissistency
+front-end and will allow attendees to post and read messages
+(Figure~\ref{fig:app}). We will also provide an optional setting that
 allows users to see how old messages are, to manually inspect the
-end-to-end delay from the write to their chosen interface. As messages
-are submitted to the Twitter clone, attendees can also witness
-user-visible latency and consistency in the monitoring interface.\\[-.5em]
+end-to-end delay from the write to their chosen interface.
+
+To provide the experience of a database administrator or operations
+technician, we will provide a \textbf{monitoring and control console}
+that measures and plots the consistency and latency over 10-second
+time intervals (Figure~\ref{fig:dash}).\footnote{We previously
+  released an interactive, browser-based demo online at
+  \url{http://pbs.cs.berkeley.edu/#demo} (but did not officially
+  demonstrate it in a peer-reviewed forum). We expect to build a
+  similar prototype for the first portion of the monitoring console
+  design. However, the online demo is based on synthetic data, while
+  the proposed demo runs in real-time on a real cluster.} Additionally
+the interface will allow users to modify system parameters like
+the read repair chance and set consistency SLAs for read and write
+operations. We will change the system parameters in real-time, and the
+consistency SLAs will affect all users' actions on the site---both
+from the replay stream and attendees accessing Twissistency.
 
 Consistency is particularly interesting under changing environmental
 conditions, so we will allow participants to control parameters like
-system latency and the performance of several replicas:
-
-\textbf{Chaos console:} We will provide a separate interface that can
-be used to inject message delays, model messages being dropped, and
-artificially slow Cassandra instances to demonstrate their effect on
-consistency. In addition to improving engagement, this will allow
-attendees to both induce consistency anomalies and understand the
-impact of several common failure modes.
-
-
+system latency and the performance of several replica. We will provide
+a \textbf{chaos console}, a separate interface that can be used to
+inject message delays, model message loss, and artificially
+slow Cassandra instances to demonstrate their effect on consistency
+(Figure~\ref{fig:chaos}). We will physically implement the actual failures via
+both JVM manipulation and host-based kernel operations. In addition to
+improving engagement, this will allow attendees to both induce
+consistency anomalies and understand the impact of several common
+failure modes.

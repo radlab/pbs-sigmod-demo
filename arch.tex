@@ -7,9 +7,7 @@ implementing both for two production NoSQL stores---Cassandra and
 Voldemort. The techniques used to measure PBS are applicable to any
 system for which we can model the replication protocol used and
 require only lightweight latency profiling in the underlying data
-store. We also explain some of the design decisions we made to
-simplify PBS integration and how this could be generalized to other
-systems.
+store.
 
 %Introductory paragraph explaining the system architecture. Explain that our
 %approach is to make PBS a shim layer on top of existing server code. Latency
@@ -18,33 +16,19 @@ systems.
 \begin{figure}
 \centering
 \includegraphics[width=\columnwidth]{figs/cluster-arch.pdf}
-\caption{Diagram showing how PBS metrics can be integrated into an existing
-NoSQL datastore. The PBS prediction module and Consistency SLA verifier drive
-the metrics used the monitoring framework.}
+\caption{Diagram showing how PBS metrics can be integrated into an
+  existing NoSQL datastore. The PBS prediction module and Consistency
+  SLA verifier provide the metrics by higher level applications like
+  dynamic query tuning, monitoring, and diagnostic tools.}
 \label{fig:pbs-sys-arch}
 \end{figure}
 
-\begin{figure*}[tb]
-\centering
-%\includegraphics[width=.90\textwidth]{figs/pbs-demo-screenshot.pdf}
-\subfigure[Mobile Web App]{\includegraphics[width=.20\textwidth]{figs/phone.pdf}}
-\subfigure[DBA and Query Tuning Dashboard]{\includegraphics[width=.39\textwidth]{figs/dash.pdf}}
-\subfigure[Chaos Console]{\includegraphics[width=.4\textwidth]{figs/chaos.pdf}}
-\caption{Mock-ups for the mobile social web application---which
-  attendees will interact with as end-users---and back-end diagnostic
-  views. In the Dashboard, attendees can monitor system consistency
-  and set latency and consistency SLAs. In the Chaos Console,
-  attendees will wreak havoc on the application's Cassandra cluster
-  via several (real-time) configurable failure modes.}
-\label{fig:pbs-demo-screenshot}
-\end{figure*}
-
-
 
 \subsection{Database Architecture}
+\label{sec:dbarch}
 
-The lower half of Figure~\ref{fig:pbs-sys-arch} shows the data store
-changes that are required to integrate PBS metrics into an existing
+The lower two layers Figure~\ref{fig:pbs-sys-arch} show the changes
+that are required to integrate PBS-style metrics into an existing
 distributed database. In each replica, or storage node, we perform
 lightweight latency profiling by piggybacking timestamps on messages
 exchanged between servers. This data is subsequently processed by two
@@ -57,22 +41,22 @@ store implementation and can be easily adapted to different systems.\\
 %module and how the Monte-Carlo simulation can be run using this data.
 \textbf{PBS Prediction:} The PBS prediction module is responsible for
 calculating the $t$-visibility and $k$-staleness of the
-datastore. This module is takes the latency for relevant operations in
-the data store (in Dynamo-style systems, the respective latencies for
-writes, acks, reads, and responses---the PBS \textit{WARS} model) that
-are sent during replication.  The prediction module tracks a moving
-window of recent latencies across servers, and, when an end-user (or
-higher-level component) requests a consistency prediction, the module
-uses the latencies to provide a prediction. Predictions are performed
-using Monte Carlo analysis, and the module simulates the interactions
-between thousands of read and write requests in the underlying
-replication mechanism that each behave stochastically according to the
-observed distributions. This allow us to estimate $t$-visibility,
-$k$-staleness, and latency for the operations under a range of
-parameter choices: replication factors, anti-entropy rates, and node
-failures. In our Cassandra implementation, we found that the
-prediction typically finishes under a second for tens of thousands of
-trials.\\
+datastore. This module records the latencies for relevant operations
+in the data store (in Dynamo-style systems, the respective latencies
+for writes, acks, reads, and responses---the PBS \textit{WARS} model)
+that are sent during replication.  The prediction module tracks a
+moving window of recent latencies across servers, and, when an
+end-user (or higher-level component) requests a consistency
+prediction, the module uses the latencies to provide a
+prediction. Predictions are performed using Monte Carlo analysis, and
+the module simulates the interactions between thousands of read and
+write requests in the underlying replication mechanism that each
+behave stochastically according to the observed distributions. This
+allows us to estimate $t$-visibility, $k$-staleness, and latency for
+the operations under a range of parameter choices: replication
+factors, anti-entropy rates, and node failures. In our Cassandra
+implementation, we found that the prediction typically finishes under
+a second for tens of thousands of trials.\\
 
 
 %Talk about how the simulation can be triggered by either the database
@@ -91,9 +75,9 @@ than predictions because determining the latest write effectively
 requires (background) consensus about the value of the latest
 write. This requires substantially more coordination than prediction
 but is the subject of considerable ongoing
-research~\cite{podc-hpl}. Our verifier for Cassandra uses white-box
+research~\cite{hotdep}. Our verifier for Cassandra uses white-box
 techniques as in the PBS predictor and the verifier collects recent
-write metadata from each replica, as in the prediction step.
+operation timing metadata from each replica, as in the prediction step.
 
 \subsection{Userspace tools}
 
@@ -103,14 +87,13 @@ consistency prediction is that the data store can use metrics to
 provide SLAs on consistency. This can be accomplished by a standalone
 module that tracks the consistency and latency profile of queries over
 time. Database administrators can specify the SLA required in terms of
-what is the maximum value of $t$-visibility, $k$-staleness, or latency
-that is acceptable. The verification module periodically triggers the
-PBS predictor. Based on the predictions, replication parameters are
-adjusted to ensure that the SLA is met while minimizing the latency
-observed. The number of possible states is limited for small values
-of$ N$, so our current implementation performs a complete search over
-the state space.  We have also formulated this as an integer linear
-program and are exploring the use of linear solvers in the future.
+maximum acceptible values for (a combination of) $t$-visibility,
+$k$-staleness, and operation latency. The verification module
+periodically triggers the PBS predictor. Based on the predictions,
+replication parameters are adjusted to ensure that the SLA is met
+while minimizing the latency observed. The number of possible states
+is limited for small values of $N$, so our current implementation
+performs a complete search over the state space.
 
 %Finally talk about how the database administration tool can also trigger the pbs
 %prediction. Explain how this works with respect to nodetool and the flexibility
@@ -123,8 +106,8 @@ command \texttt{predictconsistency} to \texttt{nodetool}, a widely
 used administration interface.  The \texttt{predictconsistency}
 command allows a flexible interface for performing PBS
 prediction. Database administrators can specify the replication factor
-($N$,$R$,$W$) to be used and the time at which a read is performed
-after a write request. This allows administrators to perform what-if
+($N$, $R$, $W$) to be used and the time at which a read is performed
+after a write request. This allows administrators to perform ``what-if''
 analysis and project the impact on latency and consistency as their
 workload changes.  Finally, we also export the consistency metrics
 over a Java MBean interface, meaning any tool that can handle MBean
