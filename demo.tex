@@ -5,58 +5,64 @@
 %integrated into the DB admin's interface. Also showing why consistency metrics
 %are important and how PBS can be used to measure this etc.
 
-\subsection{Demo Setup}
 We will present an end-to-end demonstration that will show how metrics defined
 by PBS can be used to capture the impact of consistency on user experience. We
 will also highlight how database administrators can monitor and modify system
-parameters to trade-off consistency for latency. The demonstration will consist
-of the following components:\\
+parameters to trade-off consistency for latency.\\[-.5em]
+
+The demonstration will consist of several components:
 
 %Specific demo setup details: What is the app going to be -- What tables is it
 %going to contain and how is this stored in Cassandra ?
 
-\textbf{Web Application:} We will be using a hosted Twitter-like application. We
-plan to make a web-interface that will be available to all SIGMOD attendees and
-a mobile application that can be used to post messages about the conference.\\
+\textbf{Web Application:} We will implement a Twitter-like web
+application such as Twissandra. We plan to make a web-interface that
+will be available to all SIGMOD attendees and a mobile application
+that can be used to post messages about the conference.
 
-\textbf{Distributed Datastore:} We plan to host a 50-node Cassandra cluster on
-EC2 to support our web application. The Cassandra instances will use a table to
-store the tweets published and a separate table to store the follower/following
-relationship information.\\
+\textbf{Data Sets:} In addition to the messages posted by SIGMOD
+attendees, we plan to replay a corpus of 4,937,001 Tweets from
+conversations obtained from the Twitter firehose between February and
+July 2011~\cite{ritter2010unsupervised}.  This will help us explore
+some of the issues that arise with a heavy workload.
 
-\textbf{Data Sets:} In addition to the tweets posted by SIGMOD attendees, we
-plan to inject the datastore with a corpus of 936,236 conversations obtained
-from the Twitter firehose between Feb and July 2011~\cite{ritter2010unsupervised}. 
-This will help us explore some of the issues which arise with a heavier workload.
+\textbf{Distributed Datastore:} We will host a 50-node Cassandra
+cluster on EC2 to support our web application. The Cassandra instances
+will use a table to store the Tweets published and a separate table to
+store the follower/following relationship information.\\[-.5em]
 
 %Demo screens detail - We will have two screens and what each one will show. How
 %can the audience interact with the demo ?
-\subsection{Demo Interactions}
 
-We plan to have two screens setup during the demo session: the first screen will
-show the database administrator's interface, while the second one will be used
-to show the user-interface for our web application. \\
+To illustrate the utility of consistency metrics, we will present two
+interactive, ``behind-the-scenes'' DBA- and application-oriented
+dashboards:
 
-\textbf{DB admin interface:} We plan to show a monitoring console that
-measures and plots the consistency and latency over 10-second time intervals.
-Additionally the admin interface will allow users to modify system parameters
-like the replication factor and also set consistency SLAs for read and write
-operations. Figure~\ref{fig:pbs-demo-screenshot} shows an example of how our 
-dashboards will look. \\
+\textbf{DB admin interface:} We will show a monitoring console that
+measures and plots the consistency and latency over 10-second time
+intervals.  Additionally the admin interface will allow users to
+modify system parameters like the read repair chance and set
+consistency SLAs for read and write
+operations. Figure~\ref{fig:pbs-demo-screenshot} shows an example DBA
+dashboard will look.
 
-\textbf{User-interface:} The user-interface screen will be show our
-web-application described previously and will allow attendees to post and read
-tweets. As these tweets are submitted to our Cassandra cluster, attendees can
-witness how user-visible latency and consistency are captured in the monitoring
-interface. 
+\textbf{User interface:} The user interface screen will show our
+web-application described previously and will allow attendees to post
+and read messages. We will also provide an optional setting that
+allows users to see how old messages are, to manually inspect the
+end-to-end delay from the write to their chosen interface. As messages
+are submitted to the Twitter clone, attendees can also witness
+user-visible latency and consistency in the monitoring interface.\\[-.5em]
 
-%What are the scenarios that we will demonstrate / highlight ? Talk about chaos
-%console to inject failure, delays and check how this affects consistency etc.
-\subsection{Demo Scenarios}
-We plan to explore many different scenarios to demonstrate how the latency
-consistency trade-off is affected by changes to environment in which the
-datastore is hosted. We will be hosting a \textit{chaos console} that can be
-used to inject message delays, model messages being dropped and finally even
-kill Cassandra instances randomly to see its effect on consistency. We believe
-that this will highlight the importance of consistency prediction in datacenter
-environments where such failures could occur frequently.
+Consistency is particularly interesting under changing environmental
+conditions, so we will allow participants to control parameters like
+system latency and the performance of several replicas:
+
+\textbf{Chaos console:} We will provide a separate interface that can
+be used to inject message delays, model messages being dropped, and
+artificially slow Cassandra instances to demonstrate their effect on
+consistency. In addition to improving engagement, this will allow
+attendees to both induce consistency anomalies and understand the
+impact of several common failure modes.
+
+

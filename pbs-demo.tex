@@ -1,5 +1,5 @@
 \documentclass{sig-alternate}
-\usepackage{graphicx, subfigure, multirow, times}
+\usepackage{graphicx, subfigure, multirow, times, balance}
 \usepackage{url, amsfonts, verbatim, mathtools}
 
 \renewcommand{\ttdefault}{cmtt}
@@ -20,6 +20,8 @@
     \vspace{-1em}
 }
 
+\newcommand{\vignette}[1]{\textit{\\[-.5em]\noindent#1\\[-.5em]}}
+
 \begin{document}
 
 \title{PBS at Work: Improving Data Store Operation and Performance
@@ -39,7 +41,10 @@
 \input{usage}
 \input{arch}
 \input{demo}
+\balance
+\input{takeaway}
 
+\begin{comment}
 \section{Acknowledgments}
 TODO: Thanks Jonathan Ellis for his help in creating the Cassandra patch and
 integrating it. Thank LinkedIn folks who helped in Voldemort measurement patch
@@ -51,8 +56,11 @@ Ericsson, General Electric, Hewlett Packard, Huawei, Intel, Microsoft, NetApp,
 Oracle, Quanta, Splunk, VMware and by DARPA (contract \#FA8650-11-C-7136).
 
 TODO: Add any other funding agencies ?
+\end{comment}
+
 
 \bibliographystyle{abbrv}
 \bibliography{pbs-demo}
+
 
 \end{document}

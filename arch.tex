@@ -1,14 +1,15 @@
 \section{System Architecture}
 \label{sec:architecture}
 
-The techniques used to measure probabilistically bounded staleness (PBS) are
-applicable to any system for which we can model the replication protocol used.
-PBS predictions require some lightweight latency profiling in the underlying
-datastore and we have implemented this profiling module in Cassandra and
-Voldemort, two widely used distributed key-value stores. In this section, we
-describe our experience in implementing and integrating PBS in these data
-stores. We also explain some of the design decisions we made to simplify the
-integration and how this could be generalized to other systems. 
+In this section, we briefly outline an architecture for providing
+consistency monitoring and verification given our experiences
+implementing both for two production NoSQL stores---Cassandra and
+Voldemort. The techniques used to measure PBS are applicable to any
+system for which we can model the replication protocol used and
+require only lightweight latency profiling in the underlying data
+store. We also explain some of the design decisions we made to
+simplify PBS integration and how this could be generalized to other
+systems.
 
 %Introductory paragraph explaining the system architecture. Explain that our
 %approach is to make PBS a shim layer on top of existing server code. Latency
@@ -16,7 +17,7 @@ integration and how this could be generalized to other systems.
 
 \begin{figure}
 \centering
-\includegraphics[width=.90\columnwidth]{figs/pbs-sys-arch.pdf}
+\includegraphics[width=\columnwidth]{figs/cluster-arch.pdf}
 \caption{Diagram showing how PBS metrics can be integrated into an existing
 NoSQL datastore. The PBS prediction module and Consistency SLA verifier drive
 the metrics used the monitoring framework.}
@@ -25,10 +26,16 @@ the metrics used the monitoring framework.}
 
 \begin{figure*}[tb]
 \centering
-\includegraphics[width=.90\textwidth]{figs/pbs-demo-screenshot.pdf}
-\caption{A screenshot of a PBS demo indicating the values of t-visibility for a
-given latency distribution. Our admin interface will be an extension of this
-demo and will highlight the observed consistency measurements.}
+%\includegraphics[width=.90\textwidth]{figs/pbs-demo-screenshot.pdf}
+\subfigure[Mobile Web App]{\includegraphics[width=.20\textwidth]{figs/phone.pdf}}
+\subfigure[DBA and Query Tuning Dashboard]{\includegraphics[width=.39\textwidth]{figs/dash.pdf}}
+\subfigure[Chaos Console]{\includegraphics[width=.4\textwidth]{figs/chaos.pdf}}
+\caption{Mock-ups for the mobile social web application---which
+  attendees will interact with as end-users---and back-end diagnostic
+  views. In the Dashboard, attendees can monitor system consistency
+  and set latency and consistency SLAs. In the Chaos Console,
+  attendees will wreak havoc on the application's Cassandra cluster
+  via several (real-time) configurable failure modes.}
 \label{fig:pbs-demo-screenshot}
 \end{figure*}
 
@@ -36,27 +43,36 @@ demo and will highlight the observed consistency measurements.}
 
 \subsection{Database Architecture}
 
-The lower half of Figure~\ref{fig:pbs-sys-arch} shows the architecture changes
-that are required to integrate PBS metrics into an existing distributed
-database. In each storage node, we inject lightweight latency profiling and
-introduce two new modules that help with consistency prediction and SLA
-verification. These modules are designed to be a thin-layer on top of the
-existing datastore and can be easily adapted to different systems.\\
+The lower half of Figure~\ref{fig:pbs-sys-arch} shows the data store
+changes that are required to integrate PBS metrics into an existing
+distributed database. In each replica, or storage node, we perform
+lightweight latency profiling by piggybacking timestamps on messages
+exchanged between servers. This data is subsequently processed by two
+separate modules that provide consistency prediction and SLA
+verification. These modules are cleanly separable from the main data
+store implementation and can be easily adapted to different systems.\\
 
 %Walk through the system diagram - Explain what each component does. In
 %particular explain how the latency collector feeds into the PBS prediciton
 %module and how the Monte-Carlo simulation can be run using this data.
 \textbf{PBS Prediction:} The PBS prediction module is responsible for
-calculating the \textit{t-visibility} and
-\textit{k-staleness}~\cite{pbs-vldb2012} for the
-datastore. This latency profiling module is used to extract the latency for
-writes, acks, reads and responses (WARS model) that are sent during replication.
-This data is fed into the prediction module which keeps track of the most recent
-latencies from all the operations.  Whenever a consistency prediction needs to
-be made, these latencies values are used to perform a MonteCarlo simulation. We
-execute a number of iterations of the simulation and estimate k-stateless,
-t-visibility and the latency for the operations. In our Cassandra implementation
-we found that the prediction finishes within a couple of seconds. \\ 
+calculating the $t$-visibility and $k$-staleness of the
+datastore. This module is takes the latency for relevant operations in
+the data store (in Dynamo-style systems, the respective latencies for
+writes, acks, reads, and responses---the PBS \textit{WARS} model) that
+are sent during replication.  The prediction module tracks a moving
+window of recent latencies across servers, and, when an end-user (or
+higher-level component) requests a consistency prediction, the module
+uses the latencies to provide a prediction. Predictions are performed
+using Monte Carlo analysis, and the module simulates the interactions
+between thousands of read and write requests in the underlying
+replication mechanism that each behave stochastically according to the
+observed distributions. This allow us to estimate $t$-visibility,
+$k$-staleness, and latency for the operations under a range of
+parameter choices: replication factors, anti-entropy rates, and node
+failures. In our Cassandra implementation, we found that the
+prediction typically finishes under a second for tens of thousands of
+trials.\\
 
 
 %Talk about how the simulation can be triggered by either the database
@@ -65,48 +81,69 @@ we found that the prediction finishes within a couple of seconds. \\
 %prediction module - This module also completes the loop and adjusts the value of
 %N,R and W until the consistency SLA is met.
 
-\textbf{Consistency SLA verifier:} One of the use cases of consistency
-prediction is that the data store can use this data to provide SLAs on
-consistency. This can be accomplished by a standalone module that tracks the
-consistency and latency profile of queries over time. Database administrators
-can specify the SLA required in terms of what is the maximum value of
-t-visibility or k-staleness that is acceptable. The verification module
-periodically triggers the PBS predictor. Based on the predictions, the values of
-R and W are adjusted to ensure that the SLA is met while minimizing the latency
-observed. Since the number of possible states is limited for small values of N,
-our current implementation performs a complete search over the state space.
-We have also formulated this as an integer linear program and are exploring if
-we can use linear solver in the future.
+\textbf{Consistency SLA verifier:} While predictions are useful, it is
+also beneficial to know what consistency a data store is actually
+providing. While PBS gives a precise cumulative distribution function
+that reads are consistent after a fixed amount of time, consistency
+verification amounts to integrating over the PDF: what percent of
+reads are actually consistent? Verification is somewhat more difficult
+than predictions because determining the latest write effectively
+requires (background) consensus about the value of the latest
+write. This requires substantially more coordination than prediction
+but is the subject of considerable ongoing
+research~\cite{podc-hpl}. Our verifier for Cassandra uses white-box
+techniques as in the PBS predictor and the verifier collects recent
+write metadata from each replica, as in the prediction step.
 
 \subsection{Userspace tools}
+
+
+As we described in Section~\ref{sec:dynamic}, one of the use cases of
+consistency prediction is that the data store can use metrics to
+provide SLAs on consistency. This can be accomplished by a standalone
+module that tracks the consistency and latency profile of queries over
+time. Database administrators can specify the SLA required in terms of
+what is the maximum value of $t$-visibility, $k$-staleness, or latency
+that is acceptable. The verification module periodically triggers the
+PBS predictor. Based on the predictions, replication parameters are
+adjusted to ensure that the SLA is met while minimizing the latency
+observed. The number of possible states is limited for small values
+of$ N$, so our current implementation performs a complete search over
+the state space.  We have also formulated this as an integer linear
+program and are exploring the use of linear solvers in the future.
+
 %Finally talk about how the database administration tool can also trigger the pbs
 %prediction. Explain how this works with respect to nodetool and the flexibility
 %they have with respect to the query inteface.
-The PBS predictions are not only meant to be used by automated tools like the
-SLA verifier but can also be used by database administrators to get more
-insights into the latency-consistency trade-offs for their deployment. In our
-Cassandra implementation, we have added a new command
-\textit{predictconsistency} to \textit{nodetool}, a widely used administration
-interface.  The \textit{predictconsistency} command allows a flexible interface
-for performing PBS prediction. Database administrators can specify the
-replication factor (N,R,W) to be used and the time at which a read is performed
-after a write request. This allows administrators to perform what-if analysis
-and project the impact on latency and consistency as their workload changes.
-Finally, we also export the consistency metrics over a Java MBean interface,
-meaning any tool that can handle MBean output can be used to display this
-data.\\
+The PBS predictions are not only meant to be used by automated tools
+like the SLA verifier but can also be used by database administrators
+to get more insights into the latency-consistency trade-offs for their
+deployment. In our Cassandra implementation, we have added a new
+command \texttt{predictconsistency} to \texttt{nodetool}, a widely
+used administration interface.  The \texttt{predictconsistency}
+command allows a flexible interface for performing PBS
+prediction. Database administrators can specify the replication factor
+($N$,$R$,$W$) to be used and the time at which a read is performed
+after a write request. This allows administrators to perform what-if
+analysis and project the impact on latency and consistency as their
+workload changes.  Finally, we also export the consistency metrics
+over a Java MBean interface, meaning any tool that can handle MBean
+output can be used to display this data.
 
 %Last talk a little bit about the monitoring tools and how one can export the PBS
 %metrics in a time series format and alert the users if some trigger has not been
 %meet for the given time period.
 
-In addition to automated consistency SLA verification, PBS can be used by administrators
-to monitor the consistency their datastore is providing them. In contrast to
-offline consistency verification schemes~\cite{podc-hpl}, PBS predictions provide
-a lightweight mechanism that can be used for monitoring. A monitoring tool like
-Ganglia~\cite{massie2004ganglia} or DataStax's OpsCenter~\cite{datastax-opscenter} can be used to
-issue  periodic PBS prediction requests and plot the values of t-visibility and
-k-staleness as a timeseries. This can then be integrated with rule-based
-alerting systems to page an operator if the value of t-visibility is beyond a
-particular threshold for an extended time period.
+PBS can be used by administrators to monitor the consistency their
+datastore is providing them. In contrast to offline consistency
+verification schemes~\cite{podc-hpl}, PBS predictions provide a
+lightweight mechanism that can be used for monitoring. A monitoring
+tool like Ganglia~\cite{massie2004ganglia} or DataStax's
+OpsCenter~\cite{datastax-opscenter} can be used to issue periodic PBS
+prediction requests and plot the values of $t$-visibility and
+$k$-staleness as a timeseries. This can then be integrated with
+rule-based alerting systems to page an operator if the value of
+$t$-visibility is beyond a particular threshold for an extended time
+period.
+
 

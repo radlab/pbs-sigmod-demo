@@ -1,84 +1,116 @@
 \section{Usage Scenarios}
 \label{sec:scenarios}
 
-Quantative consistency metrics are useful for a variety of services
+Quantitative consistency metrics are useful for a variety of services
 that can tolerate eventual consistency. In this section, we outline
 three use cases in the context of a hypothetical microblogging web
 service, Twissistency.
 
 \subsection{Dynamic Reconfiguration}
+\label{sec:dynamic}
 
-\textit{Twissistency's data scientists have learned that their users
-  respond negatively to high latencies, and the company sets a desired
-  latency bound of 50ms for their back-end data store requests.}\\
+Choosing the correct values for replication parameters is a difficult
+task without quantitative guidance. We believe that, instead of
+reasoning about constants like the required replicas, application
+writes should instead declaratively specify their objectives in the
+form of higher-level service agreements and allow the system to adjust
+its parameters to meet this goal.
 
 Data stores often offer a choice between replication parameters. For
-example, in Dynamo-style sytems, applications can choose the minimum
-number of replicas to read from ($R$) and write to ($W$). If $R$+$W$
-is greater than the number of replicas ($N$), operations will achieve
-\textit{strong consistency}, and, if not, the system provides 
-\textit{eventual consistency}. With a replication factor of $N=3$, we 
-have three options for eventually consistent operation: 
-$R$$=$$W$$=$$1$, $R$$=$$1$$, W$$=$$2$, and $R$$=$$2$$, W$$=$$1$. 
-$R$$=$$W$$=$$1$ is guaranteed to be fastest, but it is also the least 
-consistent.
+example, in Dynamo-style sytems like Cassandra, applications can
+choose the minimum number of replicas to read from ($R$) and write to
+($W$). If $R$+$W$ is greater than the number of replicas ($N$),
+operations will achieve \textit{strong consistency}, and, if not, the
+system provides \textit{eventual consistency}. With a replication
+factor of $N=3$, we have three options for eventually consistent
+operation: $R$$=$$W$$=$$1$, $R$$=$$1$$, W$$=$$2$, and $R$$=$$2$$,
+W$$=$$1$.  $R$$=$$W$$=$$1$ is guaranteed to be fastest, but it is also
+the least consistent. Instead of thinking about $R$ and $W$, the
+developers can think in terms of desired $t$-visibility:
 
-\textit{Based on feedback from their infrastructure team, the
-  application developers set $R$=$W$=$1$ for their Dynamo-based data
-  store. This meets the latency SLA with a 99th percentile latency of 30ms,
-  but they notice that many requests return stale data. They would
-  like to use $R$=$W$=$2$, but this is too slow. Further they notice that the
-  number of stale reads with $R$=$W$=$1$ increases when there are hotspots 
-  or failures in their cluster.}\\
+\vignette{Twissistency's data scientists have learned that their users
+  respond negatively to slow updates, and the company sets a
+  $t$-visibility target of 500ms at the 99.9th percentile for their
+  back-end data store requests while minimizing latency.}
 
-It is non-trivial for users to choose what is the right value for $R$ and $W$
-for their cluster configuration and hence users are not able to effectively use
-the flexibility provided by their data stores. Further, it would be easier for
-application programmers to state their higher-level SLAs in terms of the the 
-99th percentile latency or \textit{t-visibility} and let the system adjust its 
-parameters to meet this goal. Hence we believe that automatic and dynamic 
-reconfiguration of parameters is an important use case for many deployments. 
+How should we configure the replication parameters for a given SLA?
+One approach is to manually tune the system---this is straightforward
+but is not necessarily robust to changing conditions:
+
+\vignette{Based on feedback from their infrastructure team, the
+  developers set $R$=$W$=$1$ for their Dynamo-based data store. This
+  meets the $t$-visibility consistency SLA, but, during peak traffic,
+  the consistency SLA is violated.}
+
+Instead, we can auto-tune the replication parameters for each
+request. Consistency monitoring allows us to monitor SLA violations,
+while consistency prediction allows us the system to do forward testing of
+replication parameter changes before making them:
+
+\vignette{The consistency autotuner uses R=W=1 for most traffic but
+  switches to R=2, W=1 during peak workload times. While R=1, W=2 is
+  also viable, the autotuner determines that the 99.9th percentile
+  write latency is much higher than the read latency, which is served
+  mostly from cache.}
 
 \subsection{DBA Integration}
+\label{sec:dba}
 
-\textit{The datastore administrators at Twissistency have received reports that
-  some users are seeing very inconsistent data from their distributed datastore. 
-  They wish to study what could be the causes for this drop in consistency and
-  how would changing system parameters like anti-entropy rate affect this.
-  However they would like to understand the implications of making these changes 
-  before modifying their production datastore.}\\
+Consistency metrics can also be used in diagnostic tasks and to
+understand \textit{why} a system is misbehaving. There are a number of
+system parameters which affect the performance and observed
+consistency of a distributed data store. System administrators are
+often limited by two major shortcomings of data stores: there is often
+limited information available in terms of the currently observed
+consistency properties and lack of easy methods to understand how the
+system will behave as parameters are varied.
 
-There are a number of system parameters which affect the performance and
-observed consistency of a distributed datastore. Datastore administrators are
-often limited by two major shortcomings: a. limited information available in terms
-of the currently observed consistency properties and b. lack of easy methods to
-understand how the system will behave as parameters are varied.
+\vignette{The database administrators at Twissistency have received
+  reports that a high-profile user is seeing very stale data.}
 
-The cause for inconsistent reads could stem from the fact that there are slow
-nodes in the cluster or that there are some keys which are hotspots. The
-possible set of actions that a database administrator could choose include
-changing the number of replicas for a particular key to modifying the rate of
-anti-entropy operations like ReadRepair. We believe that providing better
-metrics and models for consistency will help database administrators rapidly 
-identify problems and measure the effects of proposed changes.
+There are a host of consistency configuration options available to
+data store administrators. Taking Cassandra as an example, they can
+configure read repair rates, perform active anti-entropy value
+exchange, and enable or disable replicas. Moreover, there are many
+causes for inconsistent reads: there may be slow nodes in the cluster
+or that there are some keys which are hotspots.
 
-% Replication parameter
-% Read repair rate
-% Slow nodes
+\vignette{The administrators inspect the consistency metrics for each
+  data store shard and identify a misbehaving set of nodes
+  corresponding to a bad top-of-rack switch. They temporarily increase
+  the rate of background version exchange for the shard and begin to
+  spin up a new replica set on a different rack.}
+
+We believe consistency metrics should allow standard analytics such as
+fine-grained drill-downs and roll-ups across both logical data items
+and physical-layer details like placement and hardware details. If, as
+in our Cassandra implementation (Section~\ref{sec:architecture}),
+monitoring is performed as a white-box, in-database service, low-level
+details like network topologies and per-operation latencies will be
+available (if useful) to the end-user. Of course, it may be sufficient
+for most users to simply experiment with common configuration
+parameters, but exposing this functionality is likely useful for power
+users.
 
 \subsection{Monitoring and Alerts}
+\label{sec:monitoring}
 
-\textit{Twissistency has a large number of DevOps who are responsible for
-  keeping their service up and running. Currently their monitoring and pager
-  service is triggered when user-visible latency is high or if some of their
-  tasks are not running. As user experience is negatively impacted by
-  inconsistent reads, the CTO wants to ensure that DevOps respond to these
-  alerts too.}\\
+Consistency metrics allow new approaches to traditional monitoring:
 
-%Devops get paged in the middle of the night
+\vignette{Twissistency has a large number of DevOps who are
+  responsible for keeping their service up and running. Currently
+  their monitoring and pager service is triggered when operation
+  latency is high or if servers fail. As user experience is negatively
+  impacted by inconsistent reads, the CTO wants to ensure that DevOps
+  respond to these alerts.}
 
-Devops monitoring systems are typically driven by rule-based triggers on
-timeseries data. This is suitable for alerts on latency, throughput and failures
-but not readily amenable to monitoring the user-visible consistency. In order to
-do so, we will need to export consistency using metrics that can be used for
-alerting and also provide tools that can be used to respond to such alerts. 
+As we discussed in Section~\label{sec:dynamic}, some parameters like
+per-request quorum settings, are amenable to SLA-based automatic
+control. However, there are a number of scenarios where traditional
+monitor-and-respond is an acceptable approach. If SLAs cannot be met
+under any circumstances (e.g., operation latency and $t$-visibility
+bounds are too restrictive), the correct response is to revise the
+SLAs or perform more invasive operations (e.g., add more
+replicas). Monitoring is also useful in the event of the event of
+large-scale failures and in providing additional oversight for
+complicated operations.
