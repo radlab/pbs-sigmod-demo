@@ -88,7 +88,7 @@ provide SLAs on consistency. This can be accomplished by a standalone
 module that tracks the consistency and latency profile of queries over
 time. Database administrators can specify the SLA required in terms of
 maximum acceptible values for (a combination of) $t$-visibility,
-$k$-staleness, and operation latency. The verification module
+$k$-staleness, and operation latency. The auto-tuning module
 periodically triggers the PBS predictor. Based on the predictions,
 replication parameters are adjusted to ensure that the SLA is met
 while minimizing the latency observed. The number of possible states
@@ -99,7 +99,7 @@ performs a complete search over the state space.
 %prediction. Explain how this works with respect to nodetool and the flexibility
 %they have with respect to the query inteface.
 The PBS predictions are not only meant to be used by automated tools
-like the SLA verifier but can also be used by database administrators
+like the auto-tuning module but can also be used by database administrators
 to get more insights into the latency-consistency trade-offs for their
 deployment. In our Cassandra implementation, we have added a new
 command \texttt{predictconsistency} to \texttt{nodetool}, a widely
@@ -117,7 +117,7 @@ output can be used to display this data.
 %metrics in a time series format and alert the users if some trigger has not been
 %meet for the given time period.
 
-PBS can be used by administrators to monitor the consistency their
+Finally, PBS can be used by administrators to monitor the consistency their
 datastore is providing them. In contrast to offline consistency
 verification schemes~\cite{podc-hpl}, PBS predictions provide a
 lightweight mechanism that can be used for monitoring. A monitoring

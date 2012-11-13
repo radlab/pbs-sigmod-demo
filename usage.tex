@@ -92,8 +92,8 @@ and physical-layer details like placement and hardware details. If, as
 in our Cassandra implementation (Section~\ref{sec:architecture}),
 monitoring is performed as a white-box, in-database service, low-level
 details like network topologies and per-operation latencies will be
-available to the end-user. Of course, it may be sufficient for most
-users to simply experiment with common configuration parameters via
+available to the administrator. Of course, it may be sufficient for most
+operations to simply experiment with common configuration parameters via
 prediction, but exposing this advanced analytics functionality is
 likely useful for power users.
 
@@ -109,7 +109,7 @@ Consistency metrics allow new approaches to traditional monitoring:
   impacted by inconsistent reads, the CTO wants to ensure that DevOps
   respond to these alerts.}
 
-As we discussed in Section~\label{sec:dynamic}, some parameters like
+As we discussed in Section~\ref{sec:dynamic}, some parameters like
 per-request quorum settings, are amenable to SLA-based automatic
 control. However, there are a number of scenarios where traditional,
 manual monitor-and-respond is an acceptable approach. If SLAs cannot
