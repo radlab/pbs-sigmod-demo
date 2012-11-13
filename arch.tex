@@ -55,8 +55,8 @@ behave stochastically according to the observed distributions. This
 allows us to estimate $t$-visibility, $k$-staleness, and latency for
 the operations under a range of parameter choices: replication
 factors, anti-entropy rates, and node failures. In our Cassandra
-implementation, we found that the prediction typically finishes under
-a second for tens of thousands of trials.\\
+implementation, we found that the prediction typically finishes within
+a second for thousands of trials.\\
 
 
 %Talk about how the simulation can be triggered by either the database
@@ -65,19 +65,22 @@ a second for tens of thousands of trials.\\
 %prediction module - This module also completes the loop and adjusts the value of
 %N,R and W until the consistency SLA is met.
 
-\textbf{Consistency SLA verifier:} While predictions are useful, it is
-also beneficial to know what consistency a data store is actually
-providing. While PBS gives a precise cumulative distribution function
-that reads are consistent after a fixed amount of time, consistency
-verification amounts to integrating over the PDF: what percent of
-reads are actually consistent? Verification is somewhat more difficult
-than predictions because determining the latest write effectively
-requires (background) consensus about the value of the latest
-write. This requires substantially more coordination than prediction
-but is the subject of considerable ongoing
-research~\cite{hotdep}. Our verifier for Cassandra uses white-box
-techniques as in the PBS predictor and the verifier collects recent
-operation timing metadata from each replica, as in the prediction step.
+\textbf{Consistency Monitoring:} While predictions are useful, it is
+also beneficial to know what consistency a data store is actually providing.
+While PBS gives a precise cumulative distribution function of reads that are
+consistent after a fixed amount of time, consistency monitoring amounts to
+integrating over the PDF: what percent of reads are actually consistent?
+Black-box monitoring is somewhat more difficult than predictions because
+determining the latest write effectively requires consensus about the value of
+the latest write. This requires substantially more coordination than prediction
+but is the subject of considerable ongoing research~\cite{hotdep}. 
+
+On the other hand, our verifier for Cassandra uses white-box techniques similar
+to the PBS predictor. Even though an operation might complete with a reply
+from a single replica (say $R$=$1$), the monitoring module asynchronously collects 
+data from other replicas as well. In addition to this, the monitoring modules
+periodically exchange timing metadata for writes and this is passed to an online
+analysis algorithm that detects potential violations of consistency.
 
 \subsection{Userspace tools}
 
