@@ -93,9 +93,8 @@ In addition to automated consistency SLA verification, PBS can be used by admini
 to monitor the consistency their datastore is providing them. In contrast to
 offline consistency verification schemes~\cite{podc-hp}, PBS predictions provide
 a lightweight mechanism that can be used for monitoring. A monitoring tool like
-Ganglia~\cite{ganglia} or DataStax's OpsCenter~\cite{ops-center} can be used to
+Ganglia~\cite{massie2004ganglia} or DataStax's OpsCenter~\cite{datastax-opscenter} can be used to
 issue  periodic PBS prediction requests and plot the values of t-visibility and
 k-staleness as a timeseries. This can then be integrated with rule-based
 alerting systems to page an operator if the value of t-visibility is beyond a
 particular threshold for an extended time period.
-
