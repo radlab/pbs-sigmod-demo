@@ -4,7 +4,7 @@
 In this section, we briefly outline an architecture for providing
 consistency monitoring and verification given our experiences
 implementing both for two production NoSQL stores---Cassandra and
-Voldemort. The techniques used to measure PBS are applicable to any
+Voldemort. The techniques used to implement PBS are applicable to any
 system for which we can model the replication protocol used and
 require only lightweight latency profiling in the underlying data
 store.
@@ -17,8 +17,8 @@ store.
 \centering
 \includegraphics[width=\columnwidth]{figs/cluster-arch.pdf}
 \caption{Diagram showing how PBS metrics can be integrated into an
-  existing NoSQL datastore. The PBS prediction module and Consistency
-  SLA verifier provide the metrics by higher level applications like
+  existing NoSQL datastore. The PBS prediction module and consistency
+  monitoring module provide the metrics used by higher level applications like
   dynamic query tuning, monitoring, and diagnostic tools.}
 \label{fig:pbs-sys-arch}
 \end{figure}
@@ -27,13 +27,13 @@ store.
 \subsection{Database Architecture}
 \label{sec:dbarch}
 
-The lower two layers Figure~\ref{fig:pbs-sys-arch} show the changes
+The lower two layers in Figure~\ref{fig:pbs-sys-arch} show the changes
 that are required to integrate PBS-style metrics into an existing
 distributed database. In each replica, or storage node, we perform
 lightweight latency profiling by piggybacking timestamps on messages
 exchanged between servers. This data is subsequently processed by two
-separate modules that provide consistency prediction and SLA
-verification. These modules are cleanly separable from the main data
+separate modules that provide consistency prediction and monitoring.
+These modules are cleanly separable from the main data
 store implementation and can be easily adapted to different systems.\\
 
 %Walk through the system diagram - Explain what each component does. In
@@ -86,7 +86,7 @@ analysis algorithm that detects potential violations of consistency.
 
 
 As we described in Section~\ref{sec:dynamic}, one of the use cases of
-consistency prediction is that the data store can use metrics to
+consistency prediction is that we can build tools that use metrics to
 provide SLAs on consistency. This can be accomplished by a standalone
 module that tracks the consistency and latency profile of queries over
 time. Database administrators can specify the SLA required in terms of
