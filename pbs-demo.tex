@@ -22,6 +22,13 @@
 
 \newcommand{\vignette}[1]{\textit{\\[-.5em]\noindent#1\\[-.5em]}}
 
+\conferenceinfo{SIGMOD'13,} {June 22--27, 2013, New York, New York, USA.}
+\CopyrightYear{2013}
+\crdata{978-1-4503-2037-5/13/06}
+\clubpenalty=10000
+\widowpenalty = 10000
+
+
 \begin{document}
 
 \title{PBS at Work: Advancing Data Store Operation via Consistency Metrics}
@@ -37,6 +44,10 @@
 \maketitle
 
 \input{abstract}
+
+\category{H.2.4}{Database Management}{Systems - \textit{Distributed databases}}
+\keywords{Distributed databases; Eventual consistency; Auto-tuning}
+
 \input{intro}
 \input{usage}
 \input{arch}
@@ -44,20 +55,16 @@
 \balance
 \input{takeaway}
 
-\begin{comment}
 \section{Acknowledgments}
 We would like to thank Jonathan Ellis for his help in reviewing and integrating
-our Cassandra patch.  WThank LinkedIn folks who helped in Voldemort measurement patch
-etc.
-
-This research is supported in part by NSF CISE Expeditions award CCF-1139158,
-gifts from Amazon Web Services, Google, SAP,  Blue Goji, Cisco, Cloudera,
-Ericsson, General Electric, Hewlett Packard, Huawei, Intel, Microsoft, NetApp,
-Oracle, Quanta, Splunk, VMware and by DARPA (contract \#FA8650-11-C-7136).
+our Cassandra patch.  
+This research is supported in part by NSF CISE Expeditions award CCF-1139158 and
+DARPA XData Award FA8750-12-2-0331, and  gifts from Amazon Web Services, Google,
+SAP,  Blue Goji, Cisco, Clearstory Data, Cloudera, Ericsson, Facebook, General
+Electric, Hortonworks, Huawei, Intel, Microsoft, NetApp, Oracle, Quanta,
+Samsung, Splunk, VMware and Yahoo!.
 
 TODO: Add any other funding agencies ?
-\end{comment}
-
 
 \bibliographystyle{abbrv}
 \bibliography{pbs-demo}
