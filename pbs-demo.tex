@@ -1,6 +1,9 @@
 \documentclass{sig-alternate}
-\usepackage{graphicx, subfigure, multirow, times, balance}
+\usepackage{graphicx, multirow, times, balance}
 \usepackage{url, amsfonts, verbatim, mathtools}
+%\newcommand{\subparagraph}{}
+%\usepackage[compact]{titlesec}
+\usepackage{subfigure}
 
 % NOTE(shivaram): This gives a Type-3 font ?
 %\renewcommand{\ttdefault}{cmtt}
@@ -30,6 +33,8 @@
 \widowpenalty = 10000
 
 
+\newcommand{\systemname}{DBSoc}
+
 \begin{document}
 
 \title{PBS at Work: Advancing Data Store Operation via Consistency Metrics}
@@ -38,6 +43,7 @@
 \affaddr{University of California, Berkeley}\\
 \affaddr{\{pbailis, shivaram, franklin, hellerstein, istoica\}@cs.berkeley.edu}}
 
+\sloppy
 \interfootnotelinepenalty=10000
 \hyphenation{prob-a-bil-is-tic-ally}
 \hyphenation{exchan-ged}
@@ -57,18 +63,14 @@
 \input{takeaway}
 
 \section{Acknowledgments}
-We would like to thank Jonathan Ellis for his help in reviewing and integrating
-our Cassandra patch.  
+We would like to thank Jonathan Ellis for his help in reviewing our Cassandra patch.  
 This research is supported in part by NSF CISE Expeditions award CCF-1139158 and
 DARPA XData Award FA8750-12-2-0331, and  gifts from Amazon Web Services, Google,
 SAP,  Blue Goji, Cisco, Clearstory Data, Cloudera, Ericsson, Facebook, General
 Electric, Hortonworks, Huawei, Intel, Microsoft, NetApp, Oracle, Quanta,
 Samsung, Splunk, VMware and Yahoo!.
 
-TODO: Add any other funding agencies ?
-
 \bibliographystyle{abbrv}
 \bibliography{pbs-demo}
-
 
 \end{document}

@@ -2,12 +2,13 @@
 \label{sec:architecture}
 
 In this section, we briefly outline an architecture for providing
-consistency monitoring and verification given our experiences
-implementing both for two production NoSQL stores---Cassandra and
+consistency prediction, monitoring and verification given our experiences
+implementing them for two production NoSQL stores---Cassandra and
 Voldemort. The techniques used to implement PBS are applicable to any
-system for which we can model the replication protocol used and
-require only lightweight latency profiling in the underlying data
-store.
+system for which we can model the replication protocol used and only
+require lightweight profiling in the data store.
+%require only lightweight latency profiling in the underlying data
+%store.
 
 %Introductory paragraph explaining the system architecture. Explain that our
 %approach is to make PBS a shim layer on top of existing server code. Latency
@@ -35,7 +36,6 @@ exchanged between servers. This data is subsequently processed by two
 separate modules that provide consistency prediction and monitoring.
 These modules are cleanly separable from the main data
 store implementation and can be easily adapted to different systems.\\
-
 %Walk through the system diagram - Explain what each component does. In
 %particular explain how the latency collector feeds into the PBS prediciton
 %module and how the Monte-Carlo simulation can be run using this data.
@@ -50,24 +50,22 @@ end-user (or higher-level component) requests a consistency
 prediction, the module uses the latencies to provide a
 prediction. Predictions are performed using Monte Carlo analysis, and
 the module simulates the interactions between thousands of read and
-write requests in the underlying replication mechanism that each
-behave stochastically according to the observed distributions. This
+write requests %in the underlying replication mechanism 
+that each behave stochastically according to the observed distributions. This
 allows us to estimate $t$-visibility, $k$-staleness, and latency for
 the operations under a range of parameter choices: replication
 factors, anti-entropy rates, and node failures. In our Cassandra
 implementation, we found that the prediction typically finishes within
-a second for thousands of trials.\\
-
+a second for thousands of trials.
 
 %Talk about how the simulation can be triggered by either the database
 %administration tool or the Consistency SLA verifier module. The consistency sla
 %verifier accepts SLA specifications from clients and periodically triggers the
 %prediction module - This module also completes the loop and adjusts the value of
 %N,R and W until the consistency SLA is met.
-
-\textbf{Consistency Monitoring:} While predictions are useful, it is
+\noindent{\textbf{Consistency Monitoring:}} While predictions are useful, it is
 also beneficial to know what consistency a data store is actually providing.
-While PBS gives a precise cumulative distribution function of reads that are
+While PBS gives a probability distribution function (PDF) of reads that are
 consistent after a fixed amount of time, consistency monitoring amounts to
 integrating over the PDF: what percent of reads are actually consistent?
 Black-box monitoring is somewhat more difficult than predictions because
@@ -107,7 +105,7 @@ to get more insights into the latency-consistency trade-offs for their
 deployment. In our Cassandra implementation, we have added a new
 command \texttt{predictconsistency} to \texttt{nodetool}, a widely
 used administration interface.  The \texttt{predictconsistency}
-command allows a flexible interface for performing PBS
+command provides a flexible interface for performing PBS
 prediction. Database administrators can specify the replication factor
 ($N$, $R$, $W$) to be used and the time at which a read is performed
 after a write request. This allows administrators to perform ``what-if''
@@ -129,7 +127,5 @@ OpsCenter~\cite{datastax-opscenter} can be used to issue periodic PBS
 prediction requests and plot the values of $t$-visibility and
 $k$-staleness as a timeseries. This can then be integrated with
 rule-based alerting systems to page an operator if the value of
-$t$-visibility is beyond a particular threshold for an extended time
-period.
-
-
+$t$-visibility is beyond a particular threshold.
+%for an extended time period.

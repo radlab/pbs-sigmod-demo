@@ -6,9 +6,10 @@ behavior, but provide limited guarantees. Stronger consistency models
 are easier to reason about but are slower and potentially
 unavailable. The choice of a consistency model has wide-ranging implications
 for application writers, operations management, and
-end-users. In light of its performance benefits, weak
-consistency is often considered acceptable.
+end-users. 
 
+In light of its performance benefits, weak
+consistency is often considered acceptable.
 One commonly deployed weak consistency model, eventual
 consistency, is, on its face, a cavalier proposition. Eventual
 consistency provides no guarantees as to when new writes will become
@@ -25,7 +26,7 @@ In recent work, we provided an analytical and empirical framework for
 analyzing the consistency provided by eventually consistent stores,
 called Probabilistically Bounded Staleness, or
 PBS~\cite{pbs-vldb2012}. Eventually consistent stores do not make promises
-about answers to the length of time required to observe an update or
+about the length of time required to observe an update or
 the staleness of values, but this does not preclude us from making
 informed statements about what is likely to happen. By using expert
 knowledge of the underlying data store and its replication protocols
@@ -36,16 +37,15 @@ of ``how eventual and how consistent is eventual consistency?''
 
 PBS predictions are part of a larger trend towards providing
 quantitative measurements and analysis of weakly consistent
-stores. There is recent work ranging from distributed systems theory
-to database practitioner communities on measuring violations of
+stores. There is recent work ranging from theoretical studies~\cite{podc-hpl}
+to practitioner reports~\cite{hotdep} on measuring violations of
 properties such as atomicity, serializability, and regular register
-semantics~\cite{hotdep}. PBS in particular has experienced relative
+semantics. PBS in particular has experienced relative
 popularity in the NoSQL community and our implementation of PBS for
 quorum-based systems was recently accepted to Cassandra's mainline
-source trunk and is slated for release by the end of
-2012~\cite{cassandra-pbs-patch}. Our discussions with other
-researchers indicate more technology transfers of monitoring
-and verification tools in the future.
+source trunk and was released in January 2013~\cite{cassandra-pbs-patch}. 
+Our discussions with other researchers indicate more technology transfers 
+of monitoring and verification tools in the future.
 
 While monitoring and prediction are useful in themselves, perhaps more
 importantly, they enable a rich space of applications that we believe
@@ -65,7 +65,7 @@ of eventually consistent stores.
 
 In this demo proposal, we outline these advanced use cases in detail
 (Section~\ref{sec:scenarios}), describe how quantitative metrics
-can be integrated into existing stores and architectures based on our
+can be integrated into existing data stores based on our
 experiences with the Cassandra community
 (Section~\ref{sec:architecture}), and sketch how we plan to
 demonstrate this newly enabled functionality, allowing SIGMOD

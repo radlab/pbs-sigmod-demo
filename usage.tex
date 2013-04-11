@@ -4,7 +4,7 @@
 Quantitative consistency metrics are useful for a variety of services
 that can tolerate eventual consistency. In this section, we outline
 three use cases in the context of a hypothetical microblogging web
-service, Twissistency.
+service, {\systemname}.
 
 \subsection{Dynamic Reconfiguration}
 \label{sec:dynamic}
@@ -16,7 +16,7 @@ should instead declaratively specify their objectives in the form of
 higher-level service agreements and allow the system to adjust its
 parameters to meet this goal.\\
 
-Data stores often offer a choice between replication parameters. For
+Data stores often offer a number of replication parameters. For
 example, in Dynamo-style sytems like Cassandra, applications can
 choose the minimum number of replicas to read from ($R$) and write to
 ($W$). If $R$+$W$ is greater than the number of replicas ($N$),
@@ -28,14 +28,15 @@ W$$=$$1$.  $R$$=$$W$$=$$1$ is guaranteed to be fastest, but it is also
 the least consistent. Instead of thinking about $R$ and $W$, the
 developers can think in terms of desired $t$-visibility:
 
-\vignette{Twissistency's data scientists have learned that their users
+\vignette{{\systemname}'s data scientists have learned that their users
   respond negatively to slow update propagation, and the company sets
   a $t$-visibility target of 500ms at the 99.9th percentile for their
   back-end data store requests (while minimizing latency).}
 
 How should we configure the replication parameters for a given SLA?
 One approach is to manually tune the system---this is straightforward
-but is not necessarily robust to changing conditions:
+but is not %necessarily% 
+always robust to changing conditions:
 
 \vignette{Based on feedback from their infrastructure team, the
   developers set $R$=$W$=$1$ for their Dynamo-based data store. This
@@ -44,8 +45,8 @@ but is not necessarily robust to changing conditions:
 
 Instead, we can auto-tune the replication parameters for each
 request. Consistency monitoring allows us to monitor SLA violations,
-while consistency prediction allows us the system to do forward testing of
-replication parameter changes before making them:
+while consistency prediction allows us the system to test replication 
+parameter changes before making them:
 
 \vignette{The consistency autotuner uses R=W=1 for most traffic but
   switches to R=2, W=1 during peak workload times. While R=1, W=2 is
@@ -55,7 +56,7 @@ replication parameter changes before making them:
 
 While the literature suggests several dynamic replication
 schemes~\cite{vahdat-article}, we are pleased that these
-techniques are now a reality for production-ready data stores.
+techniques can now become a reality for production-ready data stores.
 
 \subsection{DBA Integration}
 \label{sec:dba}
@@ -69,7 +70,7 @@ information available in terms of the currently observed consistency
 properties and lack of easy methods to understand how the
 system will behave as parameters are varied.
 
-\vignette{The database administrators at Twissistency have received
+\vignette{The database administrators at {\systemname} have received
   reports that a high-profile user is seeing very stale data.}
 
 There are a host of consistency configuration options available to
@@ -102,7 +103,7 @@ likely useful for power users.
 
 Consistency metrics allow us to look at new approaches to traditional monitoring:
 
-\vignette{Twissistency has a large number of DevOps who are
+\vignette{{\systemname} has a large number of DevOps who are
   responsible for keeping their service up and running. Currently
   their monitoring and pager service is triggered when operation
   latency is high or if servers fail. As user experience is negatively
