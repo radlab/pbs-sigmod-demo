@@ -6,10 +6,9 @@ behavior, but provide limited guarantees. Stronger consistency models
 are easier to reason about but are slower and potentially
 unavailable. The choice of a consistency model has wide-ranging implications
 for application writers, operations management, and
-end-users. 
-
-In light of its performance benefits, weak
+end-users.  In light of its performance benefits, weak
 consistency is often considered acceptable.
+
 One commonly deployed weak consistency model, eventual
 consistency, is, on its face, a cavalier proposition. Eventual
 consistency provides no guarantees as to when new writes will become
@@ -42,8 +41,8 @@ to practitioner reports~\cite{hotdep} on measuring violations of
 properties such as atomicity, serializability, and regular register
 semantics. PBS in particular has experienced relative
 popularity in the NoSQL community and our implementation of PBS for
-quorum-based systems was recently accepted to Cassandra's mainline
-source trunk and was released in January 2013~\cite{cassandra-pbs-patch}. 
+quorum-based systems was accepted to Cassandra's mainline
+source trunk and released in January 2013~\cite{cassandra-pbs-patch}. 
 Our discussions with other researchers indicate more technology transfers 
 of monitoring and verification tools in the future.
 
