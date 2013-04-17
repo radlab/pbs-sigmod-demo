@@ -2,19 +2,21 @@
 
 Modern distributed data stores offer a choice of consistency
 models. Weak consistency models are fast and guarantee ``always-on''
-behavior, but provide limited guarantees. Stronger consistency models
+behavior but provide limited guarantees. Stronger consistency models
 are easier to reason about but are slower and potentially
-unavailable~\cite{davidson-survey}. The choice of a consistency model has
-wide-ranging implications for application writers, operations
-management, and end-users.  In light of its performance
+unavailable~\cite{davidson-survey}. The choice of a consistency model
+has wide-ranging implications for application writers, operations
+management, and end-users.  Yet, in light of its performance
 benefits~\cite{abadi-pacelc}, weak consistency is often considered
 acceptable.
 
-Eventual consistency---perhaps the most frequently deployed weak
-consistency model---is particularly weak. Eventual consistency
-provides no guarantees as to when new writes will become visible to
-readers and what versions of data items will be presented in the
-interim~\cite{vogels-defs}. For example, reading all \texttt{null}
+Eventual consistency---perhaps the most commonly deployed weak
+consistency model---is particularly weak: in the absence of new writes
+to a data item, reads will eventually return the same
+value~\cite{vogels-defs}. This eventual consistency provides no
+guarantees as to when new writes will become visible to readers and
+what versions of data items will be presented in the
+interim. For example, reading all \texttt{null}
 values from a database satisfies eventual consistency. Similarly, the
 data store can delay writes for weeks and not violate eventual
 consistency guarantees. Yet, despite these weak semantics, there is
@@ -22,63 +24,59 @@ common sentiment among practitioners that eventual consistency is
 often ``good enough'' and ``worthwhile'' for many internet
 applications.
 
-In recent work, we provided an analytical and empirical framework for
-analyzing the consistency provided by eventually consistent stores,
-called Probabilistically Bounded Staleness, or
+In recent work, we provided quantitative metrics and accompanying
+techniques for analyzing the consistency provided by eventually
+consistent stores, called Probabilistically Bounded Staleness, or
 PBS~\cite{pbs-vldb2012}. Eventually consistent stores do not make
 promises about the length of time required to observe an update or the
 staleness of values, but this does not preclude us from making
 informed statements about a store's expected behavior. By using expert
 knowledge of the underlying data store and its replication protocols
-in addition to performing lightweight in-situ profiling, we can inform
-data store users about what consistency they are likely to observe in
-the future. Thus, PBS provides a probabilistic answer to the question
-of ``how eventual and how consistent is eventual consistency?''
+and performing lightweight in-situ profiling, we can inform data store
+users about what consistency they are likely to observe in the
+future. PBS provides a probabilistic answer to the question of
+``how eventual and how consistent is eventual consistency?''
 
 PBS predictions are part of a larger trend towards providing
 quantitative measurements and analysis of weakly consistent
-stores. Recent work ranges from theoretical studies~\cite{podc-hpl} to
-practitioner reports~\cite{hotdep} on measuring violations of
-properties such as atomicity, serializability, and regular register
-semantics. PBS in particular has experienced relative popularity in
-the NoSQL community and our implementation of PBS for quorum-based
-systems was integrated with Cassandra's mainline source and released
-as a feature of the 1.2.0 release in January
-2013~\cite{cassandra-pbs-patch}. Our discussions with other
-researchers indicate the possibility of additional technology
-transfer of monitoring and verification techniques in the future.
+stores. Recent work ranges from theoretical~\cite{podc-hpl} to
+experimental studies~\cite{hotdep} of properties such as linearizability,
+serializability, and regular register semantics. PBS in particular has
+experienced relative popularity in the NoSQL community and our
+implementation of PBS for quorum-based systems was integrated with
+Cassandra's mainline source and released as a feature of the 1.2.0
+release in January 2013~\cite{cassandra-pbs-patch}. Our discussions
+with other researchers indicate the possibility of additional
+technology transfer of monitoring and verification techniques in the
+future.
 
 While monitoring and prediction are useful in themselves, perhaps more
-importantly, they enable a rich space of applications that we believe
-have been neglected. For example, in our initial PBS work, we assume
-that providing predictions is a worthwhile task: understanding their
-utility is left to future work. Yet there \textit{are} many useful
-applications, among which we consider three to be the most promising:
-\textit{i.)} dynamic request-based consistency parameters, or
-auto-tuning request routing based on a latency- and consistency-based
-service level agreement, \textit{ii.)} database administration tasks
-with respect to the impact of slow nodes and networks, replication
-factors, and data store paramers like anti-entropy rates, and
-\textit{iii.)} integration into traditional alerting and monitoring
-frameworks. We elaborate further in Section~\ref{sec:scenarios}, but,
-in short, these quantitative metrics allow new ways to improve the
-performance, semantics, and maintenance of eventually consistent
-stores.
+importantly, they enable a rich space of applications that were
+previously infeasible or impossible. Among these applications, we
+consider three to be the most promising: \textit{i.)} dynamic
+request-based consistency parameters, or auto-tuning request routing
+based on a latency- and consistency-based service level agreements
+(SLAs), \textit{ii.)}  database administration tasks with respect to
+the impact of slow nodes and networks, replication factors, and data
+store paramers like anti-entropy rates, and \textit{iii.)} enhancement
+of traditional alerting and monitoring frameworks. We elaborate
+further in Section~\ref{sec:scenarios}, but, in short, these
+quantitative metrics allow new ways to improve the performance,
+semantics, and maintenance of eventually consistent stores.
 
-In this demo proposal, we outline these advanced use cases in detail
-(Section~\ref{sec:scenarios}), describe how quantitative metrics
-can be integrated into existing data stores based on our
-experiences with the Cassandra community
-(Section~\ref{sec:architecture}), and sketch how we plan to
-demonstrate this newly enabled functionality, allowing SIGMOD
-attendees to act as end-users, operations managers, and
+In this demo paper, we outline these advanced use cases in detail
+(Section~\ref{sec:scenarios}), describe how quantitative metrics can
+be integrated into existing data stores based on our experiences with
+the Cassandra community (Section~\ref{sec:architecture}), and sketch
+how we plan to demonstrate this newly enabled functionality, allowing
+SIGMOD attendees to act as end-users, operations managers, and
 adversaries of an eventually consistent internet service
 (Section~\ref{sec:demo}).
 
 \subsection{PBS Metrics}
 To provide background on consistency metrics, we briefly summarize the
-metrics proposed by PBS~\cite{pbs-vldb2012}. Data
-staleness can be expressed in terms of two metrics: wall-clock time
+metrics proposed in PBS~\cite{pbs-vldb2012}. Data
+staleness is expressed in terms of two metrics: wall-clock time
 and versions.
 
 \textbf{t-visibility:} $t$-visibility captures the ``window of
@@ -96,7 +94,7 @@ store. For example, if a data store configuration has $t$-visibilty of
 read returning a value within a bounded number of versions. This
 estimate can be useful for estimating the probability of experiencing
 monotonic reads, under which users will never read older versions than
-they have already read (i.e., reads not ``go back in
+they have already read (i.e., reads do not ``go back in
 time'')~\cite{vogels-defs}.
 
 \textbf{$\langle$k, t$\rangle$-staleness:} We can combine $t$-visibility

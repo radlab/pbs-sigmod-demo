@@ -23,9 +23,12 @@ provides eventual consistency. With a replication factor of $N=3$, we
 have three options for eventually consistent operation: $\langle
 R$$=$$W$$=$$1\rangle$, $\langle R$$=$$1$$, W$$=$$2\rangle$, and
 $\langle R$$=$$2$$, W$$=$$1\rangle$.  $\langle R$$=$$W$$=$$1\rangle$
-is guaranteed to be fastest, but it is also the ``least consistent.''
-Instead of thinking about $R$ and $W$, developers should express
-requirements in terms of desired $t$-visibility:
+is guaranteed to be fastest, but it is also the ``least consistent,''
+while $\langle R$$=$$2$$, W$$=$$1\rangle$ is ``more consistent'' but
+slower. Choosing the right configuration is non-trivial, especially
+without data regarding the effect of a given choice. Instead of
+reasoning about $R$ and $W$, service operators should think in terms
+of desired staleness:
 
 \vignette{{\systemname}'s data scientists have learned that their users
   respond negatively to slow update propagation, and the company sets
@@ -59,7 +62,7 @@ schemes~\cite{vahdat-article}, we are pleased that these techniques
 can now become a reality for production-ready data stores and
 real-world services.
 
-\subsection{DBA Integration}
+\subsection{DBA Tooling and Diagnoses}
 \label{sec:dba}
 
 Consistency metrics can also be used in diagnostic tasks and to
@@ -116,5 +119,5 @@ control. However, there are a number of scenarios where traditional,
 manual monitor-and-respond is an acceptable approach. If SLAs cannot
 be met under any circumstances (e.g., operation latency and
 $t$-visibility bounds are too restrictive), the correct response is to
-revise the SLAs or perform more invasive operations (e.g., add more
+revise the SLAs or perform more invasive operations (e.g., adding more
 replicas) that may require active human oversight.

@@ -41,16 +41,16 @@ from conversations obtained from the Twitter firehose between February
 and July 2011~\cite{ritter2010unsupervised}. This will help us explore
 heavier workloads, particularly in the absence of a deluge of activity
 from SIGMOD attendees. {\systemname} will store messages in a
-\textbf{Cassandra cluster} running on Amazon EC2. PBS is integrated in
-Cassandra, but we will also augment Cassandra to provide consistency
-monitoring as described in Section~\ref{sec:dbarch}.
+\textbf{Cassandra cluster} running on Amazon EC2. PBS is already
+integrated in Cassandra, but we will also augment Cassandra to provide
+consistency monitoring as described in Section~\ref{sec:dbarch}.
 
 %Demo screens detail - We will have two screens and what each one will show. How
 %can the audience interact with the demo ?
 
 To illustrate the utility of consistency metrics, we will provide
 attendees with the opportunity to experience consistency from three
-perspectives: as user, administrator, and powerful adversary.
+perspectives: user, administrator, and powerful adversary.
 
 The \textbf{user interface} screen will host the {\systemname}
 front-end and will allow attendees to post and read messages
