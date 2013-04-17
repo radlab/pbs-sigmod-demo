@@ -10,17 +10,17 @@ management, and end-users.  In light of its performance
 benefits~\cite{abadi-pacelc}, weak consistency is often considered
 acceptable.
 
-One commonly deployed weak consistency model, eventual consistency,
-is, on its face, a cavalier proposition. Eventual consistency provides
-no guarantees as to when new writes will become visible to readers and
-what versions of data items will be presented in the interim. For
-example, reading all \texttt{null} values from a database satisfies
-eventual consistency. Similarly, the data store can delay writes for
-weeks and not violate eventual consistency
-guarantees~\cite{vogels-defs}. Yet, despite these weak semantics,
-there is common sentiment among practitioners that eventual
-consistency is often ``good enough'' and ``worthwhile'' for many
-internet applications.
+Eventual consistency---perhaps the most frequently deployed weak
+consistency model---is particularly weak. Eventual consistency
+provides no guarantees as to when new writes will become visible to
+readers and what versions of data items will be presented in the
+interim~\cite{vogels-defs}. For example, reading all \texttt{null}
+values from a database satisfies eventual consistency. Similarly, the
+data store can delay writes for weeks and not violate eventual
+consistency guarantees. Yet, despite these weak semantics, there is
+common sentiment among practitioners that eventual consistency is
+often ``good enough'' and ``worthwhile'' for many internet
+applications.
 
 In recent work, we provided an analytical and empirical framework for
 analyzing the consistency provided by eventually consistent stores,

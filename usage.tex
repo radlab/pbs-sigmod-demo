@@ -3,8 +3,8 @@
 
 Quantitative consistency metrics are useful for a variety of services
 that can tolerate eventual consistency. In this section, we outline
-three use cases in the context of a hypothetical microblogging
-service, {\systemname}.
+three use cases via short vignettes in the context of a hypothetical
+microblogging service, {\systemname}.
 
 \subsection{Dynamic Reconfiguration}
 \label{sec:dynamic}
@@ -14,20 +14,18 @@ replication parameters is a difficult task. We believe that, instead
 of reasoning about low-level replication settings, application writes
 should instead declaratively specify their objectives in the form of
 higher-level service agreements and allow the system to adjust its
-parameters to meet this goal.
-
-Data stores often offer a number of replication parameters. For
-example, in Dynamo-style sytems like Cassandra, applications can
-choose the minimum number of replicas to read from ($R$) and write to
-($W$). If $R$+$W$ is greater than the number of replicas ($N$),
-operations will achieve \textit{strong consistency}, and, if not, the
-system provides \textit{eventual consistency}. With a replication
-factor of $N=3$, we have three options for eventually consistent
-operation: $R$$=$$W$$=$$1$, $R$$=$$1$$, W$$=$$2$, and $R$$=$$2$$,
-W$$=$$1$.  $R$$=$$W$$=$$1$ is guaranteed to be fastest, but it is also
-the ``least consistent.'' Instead of thinking about $R$ and $W$,
-developers should express requirements in terms of desired
-$t$-visibility:
+parameters to meet this goal. For example, in Dynamo-style sytems like
+Cassandra, applications can choose the minimum number of replicas to
+read from ($R$) and write to ($W$). If $R$+$W$ is greater than the
+number of replicas ($N$), operations will achieve ``strong''
+consistency (regular register semantics), and, if not, the system
+provides eventual consistency. With a replication factor of $N=3$, we
+have three options for eventually consistent operation: $\langle
+R$$=$$W$$=$$1\rangle$, $\langle R$$=$$1$$, W$$=$$2\rangle$, and
+$\langle R$$=$$2$$, W$$=$$1\rangle$.  $\langle R$$=$$W$$=$$1\rangle$
+is guaranteed to be fastest, but it is also the ``least consistent.''
+Instead of thinking about $R$ and $W$, developers should express
+requirements in terms of desired $t$-visibility:
 
 \vignette{{\systemname}'s data scientists have learned that their users
   respond negatively to slow update propagation, and the company sets
@@ -44,7 +42,7 @@ always robust to changing conditions:
   meets the $t$-visibility consistency SLA, but, during peak traffic,
   the consistency SLA is sporadically violated.}
 
-Instead of making a static assignment, monitoring-enabled systems can
+Instead of making a static assignment, metrics-enabled systems can
 auto-tune the replication parameters for each request. Consistency
 monitoring allows us to monitor SLA violations, while consistency
 prediction allows us the system to test replication parameter changes
@@ -68,10 +66,10 @@ Consistency metrics can also be used in diagnostic tasks and to
 understand \textit{why} a system is misbehaving. There are a number of
 system parameters which affect the performance and observed
 consistency of a distributed data store. However, system
-administrators currently face two major feature shortcomings: there is
-limited information available in terms of the currently observed
-consistency properties and a lack of mechanisms to understand how
-the system will behave as parameters are varied.
+administrators currently face two major feature challenges: there is
+limited information available in terms of realtime consistency
+properties and a lack of mechanisms to understand how the system will
+behave as parameters are varied.
 
 \vignette{The database administrators at {\systemname} have received
   reports that a high-profile user is seeing very stale data.}
@@ -104,14 +102,13 @@ likely useful for power users.
 \subsection{Monitoring and Alerts}
 \label{sec:monitoring}
 
-Consistency metrics allow us to look at new approaches to traditional monitoring:
+Consistency metrics allow new approaches to monitoring:
 
 \vignette{{\systemname} has a large number of DevOps who are
-  responsible for keeping their service up and running. Currently
-  their monitoring and pager service is triggered when operation
-  latency is high or if servers fail. As user experience is negatively
-  impacted by inconsistent reads, the CTO wants to ensure that DevOps
-  respond to these alerts.}
+  responsible for keeping the service online. Currently, their
+  monitoring and pager service is triggered when operation latency is
+  high or if servers fail. As user experience is negatively impacted
+  by inconsistent reads, the CTO configures custom alerts for the DevOps.}
 
 As we discussed in Section~\ref{sec:dynamic}, some parameters like
 per-request quorum settings, are amenable to SLA-based automatic
@@ -120,4 +117,4 @@ manual monitor-and-respond is an acceptable approach. If SLAs cannot
 be met under any circumstances (e.g., operation latency and
 $t$-visibility bounds are too restrictive), the correct response is to
 revise the SLAs or perform more invasive operations (e.g., add more
-replicas) which may require active human oversight.
+replicas) that may require active human oversight.

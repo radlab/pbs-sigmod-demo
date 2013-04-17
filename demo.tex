@@ -21,27 +21,27 @@
 %integrated into the DB admin's interface. Also showing why consistency metrics
 %are important and how PBS can be used to measure this etc.
 
-We will present an end-to-end demonstration that will show how metrics
-defined by PBS can be used to capture the impact of consistency on
+At SIGMOD 2013, we will present an end-to-end demonstration that will
+show how metrics defined by PBS can be used to improve consistency and
 user experience. We will also highlight how database administrators
 can monitor and modify system parameters to trade-off consistency for
-latency. The demonstration will consist of a user-facing application and 
-several other components.
+latency. The demonstration will consist of a user-facing application
+and several other components.
 
 %Specific demo setup details: What is the app going to be -- What tables is it
 %going to contain and how is this stored in Cassandra ?
 
 As a driving use case, we will implement \textbf{{\systemname}}, a
-Twitter-like microblogging application. {\systemname} will expose a web
-interface that will be available to all SIGMOD attendees and provide a
-mobile application that can be used to post messages about the
-conference. In addition to the messages posted by SIGMOD attendees, we
-plan to \textbf{replay a corpus} of 4,937,001 Tweets from
-conversations obtained from the Twitter firehose between February and
-July 2011~\cite{ritter2010unsupervised}. This will help us explore
+Twitter-like microblogging application. {\systemname} will expose a
+web interface that will be available to all SIGMOD attendees and
+provide a mobile application that can be used to post messages about
+the conference. In addition to the messages posted by SIGMOD
+attendees, we plan to \textbf{replay a corpus} of 4,937,001 Tweets
+from conversations obtained from the Twitter firehose between February
+and July 2011~\cite{ritter2010unsupervised}. This will help us explore
 heavier workloads, particularly in the absence of a deluge of activity
-from SIGMOD attendees. {\systemname} will store messages in a 50-node
-\textbf{Cassandra cluster} running on EC2. PBS is integrated in
+from SIGMOD attendees. {\systemname} will store messages in a
+\textbf{Cassandra cluster} running on Amazon EC2. PBS is integrated in
 Cassandra, but we will also augment Cassandra to provide consistency
 monitoring as described in Section~\ref{sec:dbarch}.
 
