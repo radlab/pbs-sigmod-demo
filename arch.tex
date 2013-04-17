@@ -32,19 +32,19 @@ The lower two layers of Figure~\ref{fig:pbs-sys-arch} show the changes
 that are required to integrate PBS-style metrics into an existing
 distributed data store. In each replica, or storage node, we perform
 lightweight latency profiling by piggybacking timestamps on messages
-exchanged between servers. This data is subsequently processed by two
-separate modules that provide consistency prediction and monitoring.
-These modules are cleanly separable from the main data store
-implementation and can be adapted to different systems.\\
+exchanged between servers. Two separate modules providing consistency
+prediction and monitoring subsequently process this data. The
+modules are cleanly separable from the main data store implementation
+and can be adapted to different systems.\\
 %Walk through the system diagram - Explain what each component does. In
 %particular explain how the latency collector feeds into the PBS prediciton
 %module and how the Monte-Carlo simulation can be run using this data.
 
 \noindent\textbf{PBS Prediction:} The PBS prediction module is
 responsible for calculating the $t$-visibility and $k$-staleness of
-the datastore. This module records the latencies for relevant
+the data store. This module records the latencies for relevant
 operations in the data store (in Dynamo-style systems, the respective
-latencies for writes, acks, reads, and responses---the PBS
+latencies for writes, acknowledgments, reads, and responses---the PBS
 \textit{WARS} model) that are sent during replication.  The prediction
 module tracks a moving window of recent latencies across servers, and,
 when an end-user (or higher-level component) requests a consistency
@@ -68,12 +68,12 @@ also beneficial to know what consistency a data store is actually providing.
 While PBS gives a probability distribution function (PDF) of reads that are
 consistent after a fixed amount of time, consistency monitoring amounts to
 integrating over the PDF: what percent of reads are actually consistent?
-Black-box monitoring is somewhat more difficult than predictions because
+Black box monitoring is somewhat more difficult than predictions because
 determining the latest write effectively requires consensus about the value of
 the latest write. This requires substantially more coordination than prediction
 but is the subject of considerable ongoing research~\cite{hotdep}. 
 
-On the other hand, our verifier for Cassandra uses \textit{white-box}
+On the other hand, our verifier for Cassandra uses \textit{white box}
 techniques similar to the PBS predictor. Even though an operation
 might complete with a reply from a single replica (say $R$=$1$), the
 monitoring module asynchronously collects data from all replicas. The
@@ -88,7 +88,7 @@ consistency prediction to build tools to inform and enforce
 consistency SLAs. A simple, standalone tool can track the consistency
 and latency profile of queries over time by periodically invoking the
 PBS predictor. Database administrators can specify desired SLAs in
-terms of acceptible values for a combination of $t$-visibility,
+terms of acceptable values for a combination of $t$-visibility,
 $k$-staleness, and operation latency. Based on the predictions, the
 enforcement tool can adjust replication parameters to ensure that the
 SLA is met while minimizing observed latency. For typical replication
@@ -116,8 +116,8 @@ any tool that can interface with MBeans can receive prediction data.
 %metrics in a time series format and alert the users if some trigger has not been
 %meet for the given time period.
 
-Finally, PBS can be used by administrators to monitor the consistency
-their datastore is providing them. In contrast to offline consistency
+Finally, administrators can use PBS to monitor the consistency
+provided by their data store. In contrast to offline consistency
 verification schemes~\cite{podc-hpl}, PBS provides a lightweight
 mechanism that can be used for (prediction-based) monitoring. Existing
 monitoring solutions like Ganglia or DataStax's OpsCenter periodically

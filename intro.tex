@@ -21,7 +21,7 @@ values from a database satisfies eventual consistency. Similarly, the
 data store can delay writes for weeks and not violate eventual
 consistency guarantees. Yet, despite these weak semantics, there is
 common sentiment among practitioners that eventual consistency is
-often ``good enough'' and ``worthwhile'' for many internet
+often ``good enough'' and ``worthwhile'' for many Internet
 applications.
 
 In recent work, we provided quantitative metrics and accompanying
@@ -55,10 +55,10 @@ importantly, they enable a rich space of applications that were
 previously infeasible or impossible. Among these applications, we
 consider three to be the most promising: \textit{i.)} dynamic
 request-based consistency parameters, or auto-tuning request routing
-based on a latency- and consistency-based service level agreements
+based on latency- and consistency-based service level agreements
 (SLAs), \textit{ii.)}  database administration tasks with respect to
 the impact of slow nodes and networks, replication factors, and data
-store paramers like anti-entropy rates, and \textit{iii.)} enhancement
+store parameters like anti-entropy rates, and \textit{iii.)} enhancement
 of traditional alerting and monitoring frameworks. We elaborate
 further in Section~\ref{sec:scenarios}, but, in short, these
 quantitative metrics allow new ways to improve the performance,
@@ -86,7 +86,7 @@ requests with the last written value, and $t$-visibility provides an expected
 value for this ``eventuality.''  More formally, $t$-visibility is the
 probability that a read operation starting $t$ seconds after the
 previous write completed will see the most recent value from the data
-store. For example, if a data store configuration has $t$-visibilty of
+store. For example, if a data store configuration has $t$-visibility of
 95\% at 100ms, it means that 100ms after the last write completes,
 95\% of read operations will see the most recent value.
 
